@@ -1,4 +1,4 @@
-import { Schema } from 'mongoose';
+import { Schema, model } from 'mongoose';
 import {
   Guardian,
   LoacalGuardian,
@@ -104,3 +104,5 @@ const studentSchema = new Schema<Student>({
     required: true,
   },
 });
+
+export const StudentModel = model<Student>('Student', studentSchema);
