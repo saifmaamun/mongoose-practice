@@ -13,7 +13,11 @@ const createStudentC = async (req: Request, res: Response) => {
       data: result,
     });
   } catch (err) {
-    console.log(err);
+    res.status(500).json({
+      success: false,
+      message: 'Error while creating student',
+      error: err,
+    });
   }
 };
 
@@ -27,7 +31,11 @@ const getStudentsC = async (req: Request, res: Response) => {
       data: result,
     });
   } catch (err) {
-    console.log(err);
+    res.status(500).json({
+      success: false,
+      message: 'Error while getting all students',
+      error: err,
+    });
   }
 };
 
@@ -43,7 +51,11 @@ const getSingleStudentC = async (req: Request, res: Response) => {
       data: result,
     });
   } catch (err) {
-    console.log(err);
+    res.status(500).json({
+      success: false,
+      message: 'Error while getting single student by id',
+      error: err,
+    });
   }
 };
 
