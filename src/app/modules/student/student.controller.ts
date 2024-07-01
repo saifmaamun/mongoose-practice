@@ -1,11 +1,29 @@
 import { Request, Response } from 'express';
 import { StudentServices } from './student.service';
+import StudentValidationSchema from './student.zod.validation';
+
+// import StudentValidationSchema from './student.validation';
 
 // create a new student
 const createStudentC = async (req: Request, res: Response) => {
   try {
     const { student: studentData } = req.body;
-    const result = await StudentServices.createStudentIntoDB(studentData);
+
+    // // validation using JOI
+    // const { error, value } = StudentValidationSchema.validate(studentData);
+    // const result = await StudentServices.createStudentIntoDB(value);
+    // if (error) {
+    //   res.status(500).json({
+    //     success: false,
+    //     message: 'Error while creating student',
+    //     error: error.details,
+    //   });
+    // }
+
+    // validation using zod
+    const zodParsedData = StudentValidationSchema.parse(studentData);
+
+    const result = await StudentServices.createStudentIntoDB(zodParsedData);
 
     res.status(200).json({
       success: true,
@@ -13,6 +31,7 @@ const createStudentC = async (req: Request, res: Response) => {
       data: result,
     });
   } catch (err) {
+    // console.log(err);
     res.status(500).json({
       success: false,
       message: 'Error while creating student',
