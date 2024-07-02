@@ -1,12 +1,14 @@
 import { Schema, model } from 'mongoose';
 import {
-  Guardian,
-  LoacalGuardian,
-  Student,
-  UserName,
+  TGuardian,
+  TLoacalGuardian,
+  TStudent,
+  TStudentMethods,
+  TStudentModel,
+  TUserName,
 } from './student.interface';
 
-const UserNameSchema: Schema = new Schema<UserName>({
+const UserNameSchema: Schema = new Schema<TUserName>({
   firstName: {
     type: String,
     required: true,
@@ -22,7 +24,7 @@ const UserNameSchema: Schema = new Schema<UserName>({
   },
 });
 
-const GuardianSchema: Schema = new Schema<Guardian>({
+const GuardianSchema: Schema = new Schema<TGuardian>({
   fathersName: {
     type: String,
     required: true,
@@ -46,7 +48,7 @@ const GuardianSchema: Schema = new Schema<Guardian>({
   },
 });
 
-const LocalGuardianSchema: Schema = new Schema<LoacalGuardian>({
+const LocalGuardianSchema: Schema = new Schema<TLoacalGuardian>({
   name: {
     type: String,
     required: true,
@@ -65,7 +67,7 @@ const LocalGuardianSchema: Schema = new Schema<LoacalGuardian>({
   },
 });
 
-const studentSchema = new Schema<Student>({
+const studentSchema = new Schema<TStudent, TStudentModel, TStudentMethods>({
   name: {
     type: UserNameSchema,
     required: true,
@@ -143,4 +145,12 @@ const studentSchema = new Schema<Student>({
   },
 });
 
-export const StudentModel = model<Student>('Student', studentSchema);
+studentSchema.methods.isUserExist = async function (email: string) {
+  const existingUser = await StudentModel.findOne({ email });
+  return existingUser;
+};
+
+export const StudentModel = model<TStudent, TStudentModel>(
+  'Student',
+  studentSchema,
+);

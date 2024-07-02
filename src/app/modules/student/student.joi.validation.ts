@@ -1,12 +1,12 @@
 import Joi from 'joi';
 import {
-  Guardian,
-  LoacalGuardian,
-  Student,
-  UserName,
+  TGuardian,
+  TLoacalGuardian,
+  TStudent,
+  TUserName,
 } from './student.interface';
 
-const UserNameValidationSchema = Joi.object<UserName>({
+const UserNameValidationSchema = Joi.object<TUserName>({
   firstName: Joi.string()
     .trim()
     .regex(/^[a-zA-Z]+$/)
@@ -33,7 +33,7 @@ const UserNameValidationSchema = Joi.object<UserName>({
 });
 
 // Guardian schema
-const GuardianValidationSchema = Joi.object<Guardian>({
+const GuardianValidationSchema = Joi.object<TGuardian>({
   fathersName: Joi.string().required(),
   fathersContactNo: Joi.string().optional().allow(''),
   fathersOccupation: Joi.string().required(),
@@ -43,7 +43,7 @@ const GuardianValidationSchema = Joi.object<Guardian>({
 });
 
 // Local Guardian schema
-const LocalGuardianValidationSchema = Joi.object<LoacalGuardian>({
+const LocalGuardianValidationSchema = Joi.object<TLoacalGuardian>({
   name: Joi.string().required(),
   occupation: Joi.string().required(),
   contactNo: Joi.string().required(),
@@ -51,7 +51,7 @@ const LocalGuardianValidationSchema = Joi.object<LoacalGuardian>({
 });
 
 // Student schema
-const StudentValidationSchema = Joi.object<Student>({
+const StudentValidationSchema = Joi.object<TStudent>({
   name: UserNameValidationSchema.required(),
   gender: Joi.string().valid('male', 'female').required(),
   dateOfBirth: Joi.date().iso().required(),
