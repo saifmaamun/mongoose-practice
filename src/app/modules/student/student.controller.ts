@@ -30,12 +30,13 @@ const createStudentC = async (req: Request, res: Response) => {
       message: 'Student is created succesfully',
       data: result,
     });
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (err: any) {
     // console.log(err);
     res.status(500).json({
       success: false,
       message: 'Error while creating student',
-      error: err.message || err,
+      error: err || err.message,
     });
   }
 };
@@ -77,10 +78,30 @@ const getSingleStudentC = async (req: Request, res: Response) => {
     });
   }
 };
+//delete single student by id
+const deleteSingleStudentC = async (req: Request, res: Response) => {
+  try {
+    const { studentId } = req.params;
+    const result = await StudentServices.deleteSingleStudentFromDB(studentId);
+
+    res.status(200).json({
+      success: true,
+      message: 'Student deleted successfully',
+      data: result,
+    });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: 'Error while deleting single student by id',
+      error: err,
+    });
+  }
+};
 
 export const StudentControllers = {
   createStudentC,
 
   getStudentsC,
   getSingleStudentC,
+  deleteSingleStudentC,
 };

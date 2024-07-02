@@ -1,12 +1,15 @@
 import { Schema, model } from 'mongoose';
+import bcrypt from 'bcrypt';
 import {
   TGuardian,
   TLoacalGuardian,
   TStudent,
-  TStudentMethods,
   TStudentModel,
+  // TStudentMethods,
+  // TStudentModel,
   TUserName,
 } from './student.interface';
+import config from '../../config';
 
 const UserNameSchema: Schema = new Schema<TUserName>({
   firstName: {
@@ -67,88 +70,153 @@ const LocalGuardianSchema: Schema = new Schema<TLoacalGuardian>({
   },
 });
 
-const studentSchema = new Schema<TStudent, TStudentModel, TStudentMethods>({
-  name: {
-    type: UserNameSchema,
-    required: true,
+// const studentSchema = new Schema<TStudent, TStudentModel, TStudentMethods>({   //instance methods 1
+const studentSchema = new Schema<TStudent, TStudentModel>(
+  {
+    //static methods
+    name: {
+      type: UserNameSchema,
+      required: true,
+      minLength: [8, 'Must be at least 8 characters'],
+    },
+    password: {
+      type: String,
+      required: true,
+    },
+    gender: {
+      type: String,
+      enum: ['male', 'female'],
+      required: true,
+    },
+    dateOfBirth: {
+      type: String,
+      required: true,
+    },
+    age: {
+      type: Number,
+      required: true,
+    },
+    bloodGroup: {
+      type: String,
+      enum: ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'],
+    },
+    contactNo: {
+      type: String,
+      required: true,
+    },
+    profileImageUrl: {
+      type: String,
+      required: true,
+    },
+    guardian: {
+      type: GuardianSchema,
+      required: true,
+    },
+    localGuardian: {
+      type: LocalGuardianSchema,
+      required: true,
+    },
+    presentAddress: {
+      type: String,
+      required: true,
+    },
+    permanentAddress: {
+      type: String,
+      required: true,
+    },
+    class: {
+      type: Number,
+      required: true,
+    },
+    sGroup: {
+      type: String,
+      required: true,
+    },
+    schoolName: {
+      type: String,
+      required: true,
+    },
+    collegeName: {
+      type: String,
+      required: true,
+    },
+    cGroup: {
+      type: String,
+      required: true,
+    },
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+    isActive: {
+      type: String,
+      enum: ['active', 'inActive'],
+      required: true,
+      default: 'active',
+    },
+    isDeleted: {
+      type: Boolean,
+      default: false,
+    },
   },
-  gender: {
-    type: String,
-    enum: ['male', 'female'],
-    required: true,
+  {
+    toJSON: {
+      virtuals: true,
+    },
   },
-  dateOfBirth: {
-    type: String,
-    required: true,
-  },
-  age: {
-    type: Number,
-    required: true,
-  },
-  bloodGroup: {
-    type: String,
-    enum: ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'],
-  },
-  contactNo: {
-    type: String,
-    required: true,
-  },
-  profileImageUrl: {
-    type: String,
-    required: true,
-  },
-  guardian: {
-    type: GuardianSchema,
-    required: true,
-  },
-  localGuardian: {
-    type: LocalGuardianSchema,
-    required: true,
-  },
-  presentAddress: {
-    type: String,
-    required: true,
-  },
-  permanentAddress: {
-    type: String,
-    required: true,
-  },
-  class: {
-    type: Number,
-    required: true,
-  },
-  sGroup: {
-    type: String,
-    required: true,
-  },
-  schoolName: {
-    type: String,
-    required: true,
-  },
-  collegeName: {
-    type: String,
-    required: true,
-  },
-  cGroup: {
-    type: String,
-    required: true,
-  },
-  email: {
-    type: String,
-    required: true,
-    unique: true,
-  },
-  isActive: {
-    type: String,
-    enum: ['active', 'inActive'],
-    required: true,
-  },
+);
+
+studentSchema.virtual('fullName').get(function () {
+  return `${this.name.firstName} ${this.name.lastName}`;
 });
 
-studentSchema.methods.isUserExist = async function (email: string) {
+// instance methods 1
+// studentSchema.methods.isUserExist = async function (email: string) {
+//   const existingUser = await StudentModel.findOne({ email });
+//   return existingUser;
+// };
+
+// export const StudentModel = model<TStudent, TStudentModel>(    //instance methods 1
+
+//static methods
+studentSchema.statics.isUserExist = async function (email: string) {
   const existingUser = await StudentModel.findOne({ email });
   return existingUser;
 };
+
+// middleware methods
+studentSchema.pre('save', async function (next) {
+  // hassing pasword and save the password in the database
+  // eslint-disable-next-line @typescript-eslint/no-this-alias
+  const user = this;
+  user.password = await bcrypt.hash(
+    user.password,
+    Number(config.bcrypt_salt_rounds),
+  );
+  next();
+});
+// middleware methods
+studentSchema.post('save', function (doc, next) {
+  doc.password = '';
+
+  next();
+});
+
+//query middleware
+studentSchema.pre('find', function (next) {
+  this.find({ isDeleted: { $ne: true } });
+  next();
+});
+studentSchema.pre('findOne', function (next) {
+  this.findOne({ isDeleted: { $ne: true } });
+  next();
+});
+studentSchema.pre('aggregate', function (next) {
+  this.pipeline().unshift({ $match: { isDeleted: { $ne: true } } });
+
+  next();
+});
 
 export const StudentModel = model<TStudent, TStudentModel>(
   'Student',

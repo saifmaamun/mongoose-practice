@@ -23,6 +23,7 @@ export type TLoacalGuardian = {
 };
 export type TStudent = {
   name: TUserName;
+  password: string;
   gender: 'male' | 'female';
   dateOfBirth: string;
   age: number;
@@ -40,14 +41,22 @@ export type TStudent = {
   cGroup: string;
   email: string;
   isActive: 'active' | 'inActive';
+  isDeleted: boolean;
 };
 
-export type TStudentMethods = {
+// instance methods 1
+// export type TStudentMethods = {
+//   isUserExist(email: string): Promise<TStudent | null>;
+// };
+
+// export type TStudentModel = Model<
+//   TStudent,
+//   Record<string, never>,
+//   TStudentMethods
+// >;
+
+// for static methods
+export interface TStudentModel extends Model<TStudent> {
+  // eslint-disable-next-line no-unused-vars
   isUserExist(email: string): Promise<TStudent | null>;
-};
-
-export type TStudentModel = Model<
-  TStudent,
-  Record<string, never>,
-  TStudentMethods
->;
+}
